@@ -116,7 +116,7 @@ public class MainWindowC {
     }
 
     public void openPr(File projectDirectory) {
-        mainApp.setProjectR(new ProjectR(projectDirectory));
+        mainApp.setProjectR(new ProjectR(projectDirectory,false));
         LastOpened.save(projectDirectory);
         TreeC treeController = mainApp.getTreeController();
         treeController.setRedactorTabs(redactorTabs);
@@ -206,17 +206,18 @@ public class MainWindowC {
     }
 
     private void runM(boolean debugType) {
-        String lenta = mainApp.getProjectR().getProjFile().getLentaPath();
-        if (lenta == null || lenta.equals("")) lenta = null;
-        System.out.println(mainApp.getProjectR().getProjFile().getPath() + "\\program.rtran");
-/*        System.out.println(lenta);
+        String lenta = null;
         try {
-            lenta=readFile(mainApp.getProjectR().getProjFile().getPath().toString()+"\\"+lenta,Charset.defaultCharset());
+            lenta = Explorer.readFile(Paths.get(mainApp.getProjectR().getProjFile().getPath().toString(),mainApp.getProjectR().getProjFile().getLentaPath()), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
-        }*/
+        }
+        if (lenta == null || lenta.equals("")) lenta = null;
+        System.out.println(mainApp.getProjectR().getProjFile().getPath() + "\\program.rtran");
+        System.out.println("lenta = "+lenta);
+
         //костыль
-        lenta = "perfectapple#";
+        //lenta = "perfectapple#";
         try {
             StarterMain starterMain = new StarterMain(mainApp.getProjectR().getProjFile().getPath() + "\\program.rtran", debugType, lenta, this.mainApp.getPrimaryStage());
         } catch (InterruptedException e) {

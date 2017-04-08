@@ -88,7 +88,7 @@ public class Explorer {
         return false;
     }
 
-    static String readFile(Path path, Charset encoding) throws IOException {
+    public static String readFile(Path path, Charset encoding) throws IOException {
 
         byte[] encoded = Files.readAllBytes(path);
         return new String(encoded, encoding);

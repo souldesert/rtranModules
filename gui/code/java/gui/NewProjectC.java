@@ -65,7 +65,7 @@ public class NewProjectC {
             errorLabel.setText("Ошибка создания");
         }
         else {
-            mainApp.setProjectR(new ProjectR(projectDirectory));
+            mainApp.setProjectR(new ProjectR(projectDirectory,true));
             System.out.println("projectDirectory = " + projectDirectory);
             LastOpened.save(projectDirectory);
             mainApp.getMainWindowC().openPr(projectDirectory);
