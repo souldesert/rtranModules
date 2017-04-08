@@ -23,7 +23,7 @@ public class ProjectR {
                 output.mkdir();
                 File test = new File(projectDirectory, "Тестовые данные");
                 test.mkdir();
-                File program = new File(projectDirectory, "Программа.rtran");
+                File program = new File(projectDirectory, "program.rtran");
                 program.createNewFile();
                 projFile = new ProjFile(projectDirectory);
                 Xml.save(new File(projectDirectory, "project.rpro"), projFile);

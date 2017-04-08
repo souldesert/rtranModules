@@ -1,6 +1,5 @@
 package gui;
 
-
 import Other.StarterMain;
 import gui.help.HelpWindow;
 import javafx.event.ActionEvent;
@@ -35,7 +34,11 @@ import java.util.List;
 public class MainWindowC {
     MainApp mainApp;
     @FXML
-    Button settingsBtn;
+    Button btnSettings;
+    @FXML
+    Button btnPlay;
+    @FXML
+    Button btnBug;
     @FXML
     TextArea testTextArea;
     @FXML
@@ -46,6 +49,12 @@ public class MainWindowC {
     private TextFlow errorConsole;
     @FXML
     private AnchorPane treeViewPane;
+
+    static String readFile(String path, Charset encoding)
+            throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        return new String(encoded, encoding);
+    }
 
     public AnchorPane getTreeViewPane() {
         return treeViewPane;
@@ -64,7 +73,10 @@ public class MainWindowC {
     }
 
     public void setB(boolean bool) {
-        settingsBtn.setDisable(bool);
+        btnSettings.setDisable(bool);
+        btnPlay.setDisable(bool);
+        btnBug.setDisable(bool);
+
     }
 
     public void newProject(ActionEvent actionEvent) {
@@ -85,7 +97,7 @@ public class MainWindowC {
             controller.setMainApp(mainApp);
             newProjectStage.showAndWait();
             mainApp.getPrimaryStage().show();
-
+            //fixme
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -100,10 +112,12 @@ public class MainWindowC {
                 new FileChooser.ExtensionFilter("R-tran", "project.rpro"));
         File projectDirectory = chooser.showOpenDialog(mainApp.getPrimaryStage());
         if (projectDirectory == null) return;
+        openPr(projectDirectory);
+    }
+
+    public void openPr(File projectDirectory) {
         mainApp.setProjectR(new ProjectR(projectDirectory));
         LastOpened.save(projectDirectory);
-
-
         TreeC treeController = mainApp.getTreeController();
         treeController.setRedactorTabs(redactorTabs);
         treeController.setExplorer();
@@ -113,12 +127,8 @@ public class MainWindowC {
 
     public void openPrLast(ActionEvent actionEvent) {
         File projectDirectory = LastOpened.load();
-        mainApp.setProjectR(new ProjectR(projectDirectory));
-        treeController = mainApp.getTreeController();
-        treeController.setRedactorTabs(redactorTabs);
-        treeController.setExplorer();
-        treeController.openProject(projectDirectory.toPath());
-        explorer = treeController.getExplorer();
+        if (projectDirectory == null) return;
+        openPr(projectDirectory);
     }
 
     public void handleSave(ActionEvent actionEvent) {
@@ -198,7 +208,7 @@ public class MainWindowC {
     private void runM(boolean debugType) {
         String lenta = mainApp.getProjectR().getProjFile().getLentaPath();
         if (lenta == null || lenta.equals("")) lenta = null;
-        System.out.println(mainApp.getProjectR().getProjFile().getPath() + "\\Программа.rtran");
+        System.out.println(mainApp.getProjectR().getProjFile().getPath() + "\\program.rtran");
 /*        System.out.println(lenta);
         try {
             lenta=readFile(mainApp.getProjectR().getProjFile().getPath().toString()+"\\"+lenta,Charset.defaultCharset());
@@ -208,18 +218,12 @@ public class MainWindowC {
         //костыль
         lenta = "perfectapple#";
         try {
-            StarterMain starterMain = new StarterMain(mainApp.getProjectR().getProjFile().getPath() + "\\Программа.rtran", debugType, lenta, this.mainApp.getPrimaryStage());
+            StarterMain starterMain = new StarterMain(mainApp.getProjectR().getProjFile().getPath() + "\\program.rtran", debugType, lenta, this.mainApp.getPrimaryStage());
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    static String readFile(String path, Charset encoding)
-            throws IOException
-    {
-        byte[] encoded = Files.readAllBytes(Paths.get(path));
-        return new String(encoded, encoding);
     }
 
 }

@@ -68,6 +68,7 @@ public class NewProjectC {
             mainApp.setProjectR(new ProjectR(projectDirectory));
             System.out.println("projectDirectory = " + projectDirectory);
             LastOpened.save(projectDirectory);
+            mainApp.getMainWindowC().openPr(projectDirectory);
             newProjectStage.close();
         }
     }

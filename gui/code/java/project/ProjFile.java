@@ -42,7 +42,7 @@ public class ProjFile {
         this.project_name = projectDirectory.getName();
         this.setLenta(false);
         this.setLentaPath("");
-        setPath(projectDirectory.getParentFile());
+        setPath(projectDirectory);
     }
     public ProjFile() {
     }

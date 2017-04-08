@@ -1,11 +1,13 @@
 package gui;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import project.ProjectR;
 
 import java.io.IOException;
@@ -69,6 +71,12 @@ public class MainApp extends Application {
             setMainWindowC(controller);
             scene.getStylesheets().add(MainApp.class.getResource("xml-highlighting.css").toExternalForm());
             primaryStage.setScene(scene);
+            primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent event) {
+                    System.exit(0);
+                }
+            });
             primaryStage.show();
             treeViewPane = controller.getTreeViewPane();
         } catch (IOException e) {
