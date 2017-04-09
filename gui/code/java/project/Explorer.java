@@ -1,5 +1,6 @@
 package project;
 
+import com.google.common.io.Resources;
 import filesystem.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -9,6 +10,7 @@ import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
 import org.fxmisc.flowless.VirtualizedScrollPane;
@@ -16,7 +18,9 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
+import redactorGui.RedactorModule;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -137,16 +141,19 @@ public class Explorer {
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
         return spansBuilder.create();
     }
+
     Path newName(Path oldName, String newNameString) throws IOException {
         return Files.move(oldName, oldName.resolveSibling(newNameString));
     }
+
     private Object setCellFactory(TreeView treeView) {
 
         TextFieldTreeCell<AnyInfo> cell = new TextFieldTreeCell<AnyInfo>() {
             String oldName;
+
             @Override
             public void startEdit() {
-                oldName=getText();
+                oldName = getText();
                 if (getTreeItem().getParent() == null || getTreeItem().getParent().getParent() == null)
                     return;
                 super.startEdit();
@@ -154,16 +161,16 @@ public class Explorer {
 
             @Override
             public void commitEdit(AnyInfo anyInfo) {
-                if(anyInfo instanceof FileInfo) {
+                if (anyInfo instanceof FileInfo) {
                     try {
-                        newName(anyInfo.getPath(),getText());
+                        newName(anyInfo.getPath(), getText());
                         anyInfo.getTab().setText(getText());
                         super.commitEdit(anyInfo);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-                        //fixme сделать красиво
+                //fixme сделать красиво
             }
         };
         StringConverter<AnyInfo> converter = new StringConverter<AnyInfo>() {
@@ -264,30 +271,44 @@ public class Explorer {
         event.consume();
     }
 
+    public void saveTab() {
+        MyTab tab = (MyTab) redactorTabs.getSelectionModel().getSelectedItem();
+        Path path = ((AnyInfo) tab.getTreeItem().getValue()).getPath();
+        if (tab.getType().equals("text")) {
+            saveTextArea();
+        } else if (tab.getType().equals("redactor")) {
+            RedactorModule redactorModule = (RedactorModule) tab.getField();
+            redactorModule.save();
+        }
+    }
+
     public void saveTextArea() {
         //todo сохранение текущей вкладки
         MyTab tab = (MyTab) redactorTabs.getSelectionModel().getSelectedItem();
         Path path = ((AnyInfo) tab.getTreeItem().getValue()).getPath();
+
+        CodeArea textArea = (CodeArea) tab.getField();
+        try {
+            Files.write(path, textArea.getText().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void saveTab(MyTab tab) {
+        //todo сохранение текущей вкладки
+        Path path = ((AnyInfo) tab.getTreeItem().getValue()).getPath();
         if (tab.getType().equals("text")) {
-            CodeArea textArea = (CodeArea) ((VirtualizedScrollPane) ((StackPane) tab.getContent()).getChildren().get(0)).getContent();
+            CodeArea textArea = (CodeArea) tab.getField();
             try {
                 Files.write(path, textArea.getText().getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void saveTextArea(MyTab tab) {
-        //todo сохранение текущей вкладки
-        Path path = ((AnyInfo) tab.getTreeItem().getValue()).getPath();
-        if (tab.getType().equals("text")) {
-            CodeArea textArea = (CodeArea) ((VirtualizedScrollPane) ((StackPane) tab.getContent()).getChildren().get(0)).getContent();
-            try {
-                Files.write(path, textArea.getText().getBytes());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        else if(tab.getType().equals("redactor")){
+            ((RedactorModule)tab.getField()).save();
         }
     }
 
@@ -443,7 +464,7 @@ public class Explorer {
                 });
                 try {
                     if (newTreeItem.getValue() instanceof ProgramInfo)
-                        setRtranRedactor(myTab, readFile(((FileInfo) newTreeItem.getValue()).getPath(), Charset.defaultCharset()), file.getName());
+                        setRtranRedactor(myTab, ((FileInfo) newTreeItem.getValue()).getPath(), file.getName());
                     else
                         setText(myTab, readFile(((FileInfo) newTreeItem.getValue()).getPath(), Charset.defaultCharset()), file.getName());
                 } catch (IOException e) {
@@ -464,7 +485,7 @@ public class Explorer {
         ContextMenu contextMenu = new ContextMenu(wrapItem);
         CodeArea codeArea = new CodeArea();
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-
+        tab.setField(codeArea);
         tab.setType("text");
         codeArea.setWrapText(true);
         codeArea.richChanges()
@@ -487,10 +508,14 @@ public class Explorer {
         tab.setContent(new StackPane(new VirtualizedScrollPane<CodeArea>(codeArea)));
     }
 
-    private void setRtranRedactor(Tab tab, String text, String name) {
-        Label label = new Label("Тут должен быть редактор кода");
+    private void setRtranRedactor(MyTab tab, Path path, String name) {
+        AnchorPane anchorPane = new AnchorPane();
         tab.setText(name);
-        tab.setContent(new StackPane((label)));
+        tab.setType("redactor");
+        RedactorModule redactorModule = new RedactorModule();
+        redactorModule.init(anchorPane, path.toFile());
+        tab.setField(redactorModule);
+        tab.setContent(new StackPane((anchorPane)));
     }
 
     private TreeItem<AnyInfo> loadFolders(Path file) throws IOException {

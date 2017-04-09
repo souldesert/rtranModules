@@ -40,6 +40,8 @@ public class MainWindowC {
     @FXML
     Button btnBug;
     @FXML
+    Button btnSave;
+    @FXML
     TextArea testTextArea;
     @FXML
     TabPane redactorTabs;
@@ -76,7 +78,7 @@ public class MainWindowC {
         btnSettings.setDisable(bool);
         btnPlay.setDisable(bool);
         btnBug.setDisable(bool);
-
+        btnSave.setDisable(bool);
     }
 
     public void newProject(ActionEvent actionEvent) {
@@ -141,7 +143,7 @@ public class MainWindowC {
         System.out.println("tabs.size() = " + tabs.size());
         for (int i = 0; i < tabs.size(); i++) {
             System.out.println("tabs = " + tabs.get(i).getText());
-            if (explorer.saveDialog()) explorer.saveTextArea(tabs.get(i));
+            if (explorer.saveDialog()) explorer.saveTab(tabs.get(i));
             redactorTabs.getTabs().remove(0);
         }
         explorer.getTreeView().setRoot(null);
@@ -163,7 +165,7 @@ public class MainWindowC {
     }
 
     public void saveTextArea(ActionEvent actionEvent) {
-        explorer.saveTextArea();
+        explorer.saveTab();
     }
 
     public void settings(ActionEvent actionEvent) {
@@ -182,7 +184,7 @@ public class MainWindowC {
             settingsStage.setScene(scene);
             controller.setStage(settingsStage);
             controller.setProjFile(mainApp.getProjectR().getProjFile());
-            controller.init();
+            controller.init(mainApp);
 
             settingsStage.show();
 

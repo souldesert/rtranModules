@@ -13,6 +13,16 @@ public class MyTab extends Tab {
     boolean changed = false;
     FileInfo fileInfo;
 
+    public Object getField() {
+        return field;
+    }
+
+    public void setField(Object field) {
+        this.field = field;
+    }
+
+    Object field;
+
     public MyTab() {
         super();
 
